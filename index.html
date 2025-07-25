@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material Template Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=10">
+    <!-- LIBRARY UNTUK MEMBUAT PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Additional styles for the new table design */
+        .table-input-grid {
+            grid-template-columns: 1.2fr 2.5fr 1.8fr 0.7fr 0.8fr 0.8fr;
+        }
+        .row-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .button-container {
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .button-container button {
+            margin-top: 8px;
+        }
+        #create-all-pdfs-btn {
+            background-color: #28a745;
+        }
+        #create-all-pdfs-btn:hover {
+            background-color: #218838;
+        }
+        .highlight-row {
+            animation: highlight 1.5s ease;
+        }
+        @keyframes highlight {
+            0% { background-color: #ffecb3; }
+            100% { background-color: white; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+
+        <div class="table-input-panel">
+            <h2 style="text-align: center;">Input Data Tabel</h2>
+            <div class="table-wrapper">
+                <div class="table-input-grid">
+                    <!-- Header Row -->
+                    <div class="table-header">Material</div>
+                    <div class="table-header">Description</div>
+                    <div class="table-header">Part Number</div>
+                    <div class="table-header">UoM</div>
+                    <div class="table-header">Mat. Type</div>
+                    <div class="table-header">Mat. Group</div>
+                    
+                    <!-- Row 1 -->
+                    <input type="text" id="table-material-1" placeholder="Material..." class="row-input">
+                    <input type="text" id="table-description-1" placeholder="Description..." class="row-input">
+                    <input type="text" id="table-partnumber-1" placeholder="Part Number..." class="row-input">
+                    <input type="text" id="table-uom-1" placeholder="UoM..." class="row-input">
+                    <input type="text" id="table-mattype-1" placeholder="Mat. Type..." class="row-input">
+                    <input type="text" id="table-matgroup-1" placeholder="Mat. Group..." class="row-input">
+                    
+                    <!-- Row 2 -->
+                    <input type="text" id="table-material-2" placeholder="Material..." class="row-input">
+                    <input type="text" id="table-description-2" placeholder="Description..." class="row-input">
+                    <input type="text" id="table-partnumber-2" placeholder="Part Number..." class="row-input">
+                    <input type="text" id="table-uom-2" placeholder="UoM..." class="row-input">
+                    <input type="text" id="table-mattype-2" placeholder="Mat. Type..." class="row-input">
+                    <input type="text" id="table-matgroup-2" placeholder="Mat. Group..." class="row-input">
+                    
+                    <!-- Row 3 -->
+                    <input type="text" id="table-material-3" placeholder="Material..." class="row-input">
+                    <input type="text" id="table-description-3" placeholder="Description..." class="row-input">
+                    <input type="text" id="table-partnumber-3" placeholder="Part Number..." class="row-input">
+                    <input type="text" id="table-uom-3" placeholder="UoM..." class="row-input">
+                    <input type="text" id="table-mattype-3" placeholder="Mat. Type..." class="row-input">
+                    <input type="text" id="table-matgroup-3" placeholder="Mat. Group..." class="row-input">
+                    
+                    <!-- Row 4 -->
+                    <input type="text" id="table-material-4" placeholder="Material..." class="row-input">
+                    <input type="text" id="table-description-4" placeholder="Description..." class="row-input">
+                    <input type="text" id="table-partnumber-4" placeholder="Part Number..." class="row-input">
+                    <input type="text" id="table-uom-4" placeholder="UoM..." class="row-input">
+                    <input type="text" id="table-mattype-4" placeholder="Mat. Type..." class="row-input">
+                    <input type="text" id="table-matgroup-4" placeholder="Mat. Group..." class="row-input">
+                    
+                    <!-- Row 5 -->
+                    <input type="text" id="table-material-5" placeholder="Material..." class="row-input">
+                    <input type="text" id="table-description-5" placeholder="Description..." class="row-input">
+                    <input type="text" id="table-partnumber-5" placeholder="Part Number..." class="row-input">
+                    <input type="text" id="table-uom-5" placeholder="UoM..." class="row-input">
+                    <input type="text" id="table-mattype-5" placeholder="Mat. Type..." class="row-input">
+                    <input type="text" id="table-matgroup-5" placeholder="Mat. Group..." class="row-input">
+                </div>
+            </div>
+            <div class="button-container">
+                <button id="transfer-data-btn">Apply Data to Layout</button>
+                <button id="create-pdf-btn">Create Current PDF</button>
+                <button id="create-all-pdfs-btn">Create All 5 PDFs</button>
+            </div>
+        </div>
+
+        <div class="dual-sap-layout" id="pdf-content">
+            <!-- === KOLOM KIRI (BEFORE) === -->
+            <div class="layout-column">
+                <h2 class="layout-title">Before</h2>
+                <div class="sap-container">
+                    <header class="main-menu">
+                        <ul>
+                            <li><strong>Material</strong></li>
+                            <li>Edit</li>
+                            <li>Goto</li>
+                            <li>Environment</li>
+                            <li>System</li>
+                            <li>Help</li>
+                        </ul>
+                    </header>
+                    <div class="title-bar">
+                        <h1>Change Material</h1>
+                    </div>
+                    <div class="actions-toolbar">
+                        <button><i class="fa-solid fa-folder-plus icon-add"></i><span>Additional Data</span></button>
+                        <button><i class="fa-solid fa-sitemap icon-org"></i><span>Org. Levels</span></button>
+                        <button><i class="fa-solid fa-clipboard-check icon-check"></i><span>Check Screen Data</span></button>
+                        <button><i class="fa-solid fa-lock icon-lock"></i></button>
+                    </div>
+                    <nav class="tabs">
+                        <button class="tab-link active" data-tab="basic-data-1"><i class="fa-solid fa-layer-group"></i><span>Basic data 1</span></button>
+                        <button class="tab-link" data-tab="basic-data-2"><i class="fa-solid fa-layer-group"></i><span>Basic data 2</span></button>
+                        <button class="tab-link" data-tab="purchasing"><i class="fa-solid fa-layer-group"></i><span>Purchasing</span></button>
+                        <button class="tab-link" data-tab="intl-trade"><i class="fa-solid fa-layer-group"></i><span>Intl Trade: Import</span></button>
+                        <button class="tab-link" data-tab="purchase-order"><i class="fa-solid fa-layer-group"></i><span>Purchase order text</span></button>
+                    </nav>
+                    <main id="basic-data-1" class="tab-content active">
+                        <div class="top-form-grid">
+                            <label for="material">Material</label>
+                            <input type="text" id="material" readonly>
+                            <button class="input-icon">[i]</button>
+                            <label for="description">Descr.</label>
+                            <input type="text" id="description" readonly>
+                            <span></span> 
+                        </div>
+                        <section class="form-section">
+                            <div class="section-content">
+                                <h2 class="section-header">General Data</h2>
+                                <div class="two-column-layout">
+                                    <div class="left-column">
+                                        <div class="form-row">
+                                            <label for="base-unit">Base Unit of Measure</label>
+                                            <input type="text" id="base-unit" class="input-xs" readonly>
+                                            <span class="uom-description">Piece</span>
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="old-material-number">Old material number</label>
+                                            <input type="text" id="old-material-number" class="input-l">
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="product-allocation">Product allocation</label>
+                                            <input type="text" id="product-allocation" class="input-l">
+                                        </div>
+                                    </div>
+                                    <div class="right-column">
+                                         <div class="form-row">
+                                            <label for="material-group">Material Group</label>
+                                            <input type="text" id="material-group" class="input-m" readonly>
+                                         </div>
+                                         <div class="form-row">
+                                            <label for="lab-office">Lab/Office</label>
+                                            <input type="text" id="lab-office" class="input-d">
+                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="form-section">
+                            <div class="section-content">
+                                <h2 class="section-header">Parts Interchangeability</h2>
+                                <div class="sub-section-container">
+                                    <h3 class="sub-section-header">Inventory-managed manufacturer part number</h3>
+                                    <div class="form-row">
+                                        <label for="mfr-part-number">External Manuf</label>
+                                        <input type="text" id="external-manuf" class="input-x">
+                                    </div>
+                                    <div class="form-row">
+                                        <label for="mfr-part-number">Mfr Part Number</label>
+                                        <input type="text" id="mfr-part-number" class="input-xl">
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                    <main id="basic-data-2" class="tab-content"><p>Konten untuk Basic data 2...</p></main>
+                    <main id="purchasing" class="tab-content"><p>Konten untuk Purchasing...</p></main>
+                    <main id="intl-trade" class="tab-content"><p>Konten untuk Intl Trade: Import...</p></main>
+                    <main id="purchase-order" class="tab-content"><p>Konten untuk Purchase order text...</p></main>
+                </div>
+            </div>
+            <!-- === KOLOM KANAN (AFTER) === -->
+            <div class="layout-column">
+                <h2 class="layout-title">After</h2>
+                <div class="sap-container">
+                    <header class="main-menu">
+                        <ul>
+                            <li><strong>Material</strong></li>
+                            <li>Edit</li>
+                            <li>Goto</li>
+                            <li>Environment</li>
+                            <li>System</li>
+                            <li>Help</li>
+                        </ul>
+                    </header>
+                    <div class="title-bar">
+                        <h1>Change Material</h1>
+                    </div>
+                    <div class="actions-toolbar">
+                        <button><i class="fa-solid fa-folder-plus icon-add"></i><span>Additional Data</span></button>
+                        <button><i class="fa-solid fa-sitemap icon-org"></i><span>Org. Levels</span></button>
+                        <button><i class="fa-solid fa-clipboard-check icon-check"></i><span>Check Screen Data</span></button>
+                        <button><i class="fa-solid fa-lock icon-lock"></i></button>
+                    </div>
+                    <nav class="tabs">
+                        <button class="tab-link active" data-tab="basic-data-1_2"><i class="fa-solid fa-layer-group"></i><span>Basic data 1</span></button>
+                        <button class="tab-link" data-tab="basic-data-2_2"><i class="fa-solid fa-layer-group"></i><span>Basic data 2</span></button>
+                        <button class="tab-link" data-tab="purchasing_2"><i class="fa-solid fa-layer-group"></i><span>Purchasing</span></button>
+                        <button class="tab-link" data-tab="intl-trade_2"><i class="fa-solid fa-layer-group"></i><span>Intl Trade: Import</span></button>
+                        <button class="tab-link" data-tab="purchase-order_2"><i class="fa-solid fa-layer-group"></i><span>Purchase order text</span></button>
+                    </nav>
+                    <main id="basic-data-1_2" class="tab-content active">
+                         <div class="top-form-grid">
+                            <label for="material_2">Material</label>
+                            <input type="text" id="material_2" readonly>
+                            <button class="input-icon">[i]</button>
+                            <label for="description_2">Descr.</label>
+                            <input type="text" id="description_2" readonly>
+                            <span></span> 
+                        </div>
+                        <section class="form-section">
+                            <div class="section-content">
+                                <h2 class="section-header">General Data</h2>
+                                <div class="two-column-layout">
+                                    <div class="left-column">
+                                        <div class="form-row">
+                                            <label for="base-unit_2">Base Unit of Measure</label>
+                                            <input type="text" id="base-unit_2" class="input-xs" readonly>
+                                            <span class="uom-description">Piece</span>
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="old-material-number_2">Old material number</label>
+                                            <input type="text" id="old-material-number_2" class="input-l">
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="product-allocation_2">Product allocation</label>
+                                            <input type="text" id="product-allocation_2" class="input-l">
+                                        </div>
+                                    </div>
+                                    <div class="right-column">
+                                         <div class="form-row">
+                                            <label for="material-group_2">Material Group</label>
+                                            <input type="text" id="material-group_2" class="input-m" readonly>
+                                         </div>
+                                         <div class="form-row">
+                                            <label for="lab-office_2">Lab/Office</label>
+                                            <input type="text" id="lab-office_2" class="input-d">
+                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="form-section">
+                            <div class="section-content">
+                                <h2 class="section-header">Parts Interchangeability</h2>
+                                <div class="sub-section-container">
+                                    <h3 class="sub-section-header">Inventory-managed manufacturer part number</h3>
+                                    <div class="form-row">
+                                        <label for="mfr-part-number">External Manuf</label>
+                                        <input type="text" id="external-manuf_2" class="input-x">
+                                    </div>
+                                    <div class="form-row">
+                                        <label for="mfr-part-number">Mfr Part Number</label>
+                                        <input type="text" id="mfr-part-number_2" class="input-xl">
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                    <main id="basic-data-2_2" class="tab-content"><p>Konten untuk Basic data 2...</p></main>
+                    <main id="purchasing_2" class="tab-content"><p>Konten untuk Purchasing...</p></main>
+                    <main id="intl-trade_2" class="tab-content"><p>Konten untuk Intl Trade: Import...</p></main>
+                    <main id="purchase-order_2" class="tab-content"><p>Konten untuk Purchase order text...</p></main>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Enhanced paste functionality for Excel-like input
+        document.addEventListener('DOMContentLoaded', function() {
+            const gridContainer = document.querySelector('.table-input-grid');
+            
+            if (gridContainer) {
+                gridContainer.addEventListener('paste', function(event) {
+                    event.preventDefault();
+                    const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+                    const rows = pastedText.split('\n').map(row => row.split('\t'));
+                    
+                    for (let i = 0; i < Math.min(rows.length, 5); i++) {
+                        const rowData = rows[i];
+                        if (rowData.length >= 6) {
+                            // Map Excel columns to our new order
+                            document.getElementById(`table-material-${i+1}`).value = rowData[0] || '';
+                            document.getElementById(`table-description-${i+1}`).value = rowData[1] || '';
+                            document.getElementById(`table-partnumber-${i+1}`).value = rowData[2] || '';
+                            document.getElementById(`table-uom-${i+1}`).value = rowData[3] || '';
+                            document.getElementById(`table-mattype-${i+1}`).value = rowData[4] || '';
+                            document.getElementById(`table-matgroup-${i+1}`).value = rowData[5] || '';
+                            
+                            // Highlight the row to show data has been pasted
+                            const rowInputs = document.querySelectorAll(`.row-input[data-row="${i+1}"]`);
+                            rowInputs.forEach(input => {
+                                input.classList.add('highlight-row');
+                                setTimeout(() => input.classList.remove('highlight-row'), 1500);
+                            });
+                        }
+                    }
+                });
+                
+                // Add row numbers to all inputs for highlighting
+                document.querySelectorAll('.row-input').forEach((input, index) => {
+                    const row = Math.floor(index / 6) + 1;
+                    input.dataset.row = row;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
