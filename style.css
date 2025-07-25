@@ -134,10 +134,101 @@ input[type="text"] {
 
 .button-container {
     display: flex;
-    gap: 10px;
-}
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    margin-top: 20px;
+  }
 
-#transfer-data-btn, #create-pdf-btn {
+  /* Style untuk dropdown KPI Type */
+  .kpi-type-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #e9ecef;
+    padding: 8px 15px;
+    border-radius: 6px;
+  }
+
+  .kpi-type-selector label {
+    font-weight: bold;
+    color: #495057;
+    white-space: nowrap;
+  }
+
+  .kpi-type-selector select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background-color: white;
+    font-size: 14px;
+    min-width: 200px;
+  }
+
+  /* Tombol styling */
+  .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background-color: #0d6efd;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #0b5ed7;
+  }
+
+  .btn-success {
+    background-color: #198754;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background-color: #157347;
+  }
+
+  /* Perbaikan untuk tooltip */
+  .tooltip-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 10px;
+    width: 250px;
+    margin-bottom: 10px;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+
+  .tooltip-container:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+
+#transfer-data-btn, #create-pdf-btn, #create-all-pdfs-btn {
     padding: 8px 16px;
     font-size: 14px;
     font-weight: bold;
@@ -228,7 +319,7 @@ input[type="text"] {
 }
 
 .actions-toolbar .icon-org { 
-    color: #27AE60; 
+    color: #357d53; 
 }
 
 .actions-toolbar .icon-check { 
@@ -722,4 +813,18 @@ input[type="text"],
 #description_2 {
     width: 300px; /* <-- PASTIKAN ANGKA INI SAMA */
     justify-self: start;
+}
+
+/* Aturan untuk tombol "Create All 5 PDFs" */
+#create-all-pdfs-btn {
+    background-color: #28a745 !important; /* Warna hijau yang lebih terang dan jelas */
+    color: #FFFFFF !important;             /* Teks warna putih untuk kontras tinggi */
+    border: 1px solid #1e7e34 !important;  /* Border yang serasi */
+    font-weight: 550;
+}
+
+/* Efek saat mouse diarahkan ke tombol */
+#create-all-pdfs-btn:hover {
+    background-color: #218838 !important;
+    border-color: #1c7430 !important;
 }
