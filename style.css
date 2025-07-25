@@ -393,7 +393,6 @@ input[type="text"] {
 }
 
 .section-header {
-    color: var(--sap-accent-blue); 
     font-size: 14px; 
     font-weight: 600;
     padding-bottom: 1px; 
@@ -506,7 +505,6 @@ input[type="text"][readonly] {
 }
 
 .sub-section-header {
-    color: var(--sap-accent-blue); 
     font-size: 13px; 
     font-weight: normal;
     padding-bottom: 8px; 
