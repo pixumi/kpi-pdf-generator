@@ -508,7 +508,7 @@ input[type="text"][readonly] {
     font-size: 13px; 
     font-weight: normal;
     padding-bottom: 8px; 
-    margin-bottom: 12px;
+    margin-bottom: 1px;
     border-bottom: 1px solid var(--sap-accent-blue);
 }
 
