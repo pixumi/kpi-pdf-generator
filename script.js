@@ -89,12 +89,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('material-group').value = matGroupVal;
         document.getElementById('mfr-part-number').value = partNumberVal;
 
-        // Layout kanan (After) - hapus tanda kutip
-        document.getElementById('material_2').value = materialVal.replace(/"/g, '');
-        document.getElementById('description_2').value = descriptionVal.replace(/"/g, '');
-        document.getElementById('base-unit_2').value = uomVal.replace(/"/g, '');
-        document.getElementById('material-group_2').value = matGroupVal.replace(/"/g, '');
-        document.getElementById('mfr-part-number_2').value = partNumberVal.replace(/"/g, '');
+        // Layout kanan (After) - hapus tanda kutip dan spasi ganda
+        document.getElementById('material_2').value = materialVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+        document.getElementById('description_2').value = descriptionVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+        document.getElementById('base-unit_2').value = uomVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+        document.getElementById('material-group_2').value = matGroupVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+        document.getElementById('mfr-part-number_2').value = partNumberVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
         // =========================
 
         // Highlight baris yang aktif
