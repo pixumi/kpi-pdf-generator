@@ -298,16 +298,16 @@ input[type="text"] {
 
 .section-content { 
     border: 1px solid var(--sap-border-color); 
-    padding: 12px; 
+    padding: 5px; 
 }
 
 .section-header {
     color: var(--sap-accent-blue); 
     font-size: 14px; 
     font-weight: 600;
-    padding-bottom: 8px; 
-    margin-bottom: 12px;
-    border-bottom: 2px solid var(--sap-accent-blue);
+    padding-bottom: 1px; 
+    margin-bottom: 1px;
+    border-bottom: 1px solid var(--sap-accent-blue);
 }
 
 input[type="text"] {
@@ -332,7 +332,7 @@ input[type="text"][readonly] {
 .top-form-grid {
     display: grid; 
     grid-template-columns: 100px 1fr auto;
-    gap: 10px; 
+    gap: 3px; 
     align-items: center; 
     margin-bottom: 16px;
 }
@@ -362,13 +362,13 @@ input[type="text"][readonly] {
     display: grid; 
     grid-template-columns: 2fr 1fr;
     gap: 20px; 
-    padding-top: 10px;
+    padding-top: 6px;
 }
 
 .left-column, .right-column { 
     display: flex; 
     flex-direction: column; 
-    gap: 10px; 
+    gap: 3px; 
 }
 
 .uom-description { 
@@ -380,7 +380,7 @@ input[type="text"][readonly] {
 .form-row { 
     display: flex; 
     align-items: center; 
-    gap: 8px; 
+    gap: 3px; 
 }
 
 .form-row > label[for] {
@@ -407,11 +407,11 @@ input[type="text"][readonly] {
 
 .sub-section-container {
     border: 1px solid var(--sap-border-color); 
-    padding: 12px; 
-    margin-top: 5px;
+    padding: 3px; 
+    margin-top: 3px;
     display: flex; 
     flex-direction: column; 
-    gap: 10px;
+    gap: 3px;
 }
 
 .sub-section-header {
@@ -704,4 +704,22 @@ input[type="text"],
 
 .layout-column:last-child input[type="text"]:focus {
     outline: 2px solid #ffcccc; /* Highlight merah saat focus */
+}
+
+/* ============================================== */
+/* === PENYESUAIAN LEBAR INPUT MATERIAL/DESCR === */
+/* ============================================== */
+
+/* Targetkan ID spesifik untuk layout kiri (Before) */
+#material,
+#description {
+    width: 300px; /* <-- UBAH ANGKA INI SESUAI KEBUTUHAN */
+    justify-self: start; /* Mencegah input meregang penuh */
+}
+
+/* Targetkan ID spesifik untuk layout kanan (After) */
+#material_2,
+#description_2 {
+    width: 300px; /* <-- PASTIKAN ANGKA INI SAMA */
+    justify-self: start;
 }
