@@ -1,283 +1,707 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // --- VARIABEL GLOBAL ---
-    let currentActiveRow = 1;
+:root {
+    --sap-bg-main: #F7F7F7;
+    --sap-bg-header: #f8f8f8;
+    --sap-bg-input: #FFFFFF;
+    --sap-border-color: #B0B0B0;
+    --sap-border-color-input: #888;
+    --sap-accent-blue: #00539B;
+    --sap-font-family: Arial, Helvetica, sans-serif;
+    --element-height: 24px;
+}
 
-    // --- MANAJEMEN NAMA FILE PDF ---
-    /**
-     * Objek untuk mengelola state (status) penghitung file.
-     * Ini akan melacak tanggal terakhir dan nomor urut terakhir yang digunakan.
-     */
-    const fileCounterState = {
-        lastDate: '',
-        counter: 0
-    };
+body {
+    background-color: #b6d4ff;
+    font-family: var(--sap-font-family);
+    font-size: 14px;
+    margin: 0;
+    padding: 20px;
+    overflow-x: hidden;
+}
 
-    /**
-     * Fungsi untuk menghasilkan nama file sesuai format DDMMYY-Nomor_VALIDATION.pdf
-     * @returns {string} Nama file yang sudah diformat.
-     */
-    function generateValidationFilename() {
-        const now = new Date();
-        const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const year = now.getFullYear().toString().slice(-2);
-        const currentDateString = `${day}${month}${year}`;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        if (currentDateString === fileCounterState.lastDate) {
-            fileCounterState.counter++;
-        } else {
-            fileCounterState.lastDate = currentDateString;
-            fileCounterState.counter = 1;
-        }
+.main-wrapper {
+    width: 1320px; 
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 0 auto;
+}
 
-        const filename = `${fileCounterState.lastDate}-${fileCounterState.counter}_VALIDATION.pdf`;
-        return filename;
+/* ================== OPTIMASI UTAMA UNTUK PDF ================== */
+/* Mengurangi kompleksitas visual untuk hasil PDF yang lebih ringan */
+.sap-container {
+    width: 100%;
+    background-color: var(--sap-bg-main);
+    border: 1px solid var(--sap-border-color);
+    box-shadow: none; /* Menghilangkan shadow untuk PDF */
+    overflow: visible !important;
+    position: relative;
+}
+
+/* Menghilangkan efek hover untuk PDF */
+@media not print {
+    .sap-container {
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .actions-toolbar button:hover { 
+        background-color: #d1d1d1; 
+    }
+    
+    #transfer-data-btn:hover {
+        background-color: #00427a;
+    }
+    
+    #create-pdf-btn:hover {
+        background-color: #4a4f54;
+    }
+}
+
+/* Perbaikan khusus untuk border tebal */
+.sap-container,
+.section-content,
+.sub-section-container,
+.top-form-grid > label, .form-row > label[for],
+input[type="text"] {
+    border-width: 1px !important;
+}
+
+.table-input-panel {
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.table-input-panel h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 18px;
+    color: #343a40;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+/* Perubahan utama untuk tabel input 5 baris */
+.table-input-grid {
+    display: grid;
+    grid-template-columns: auto 1.2fr 2.5fr 1.8fr 0.7fr 0.8fr 0.8fr;
+    min-width: 1000px;
+    gap: 1px;
+    background-color: #B0B0B0;
+    border: 1px solid #B0B0B0;
+    margin-bottom: 16px;
+}   
+
+.table-header {
+    background-color: #f8f8f8;
+    padding: 8px 10px;
+    font-weight: bold;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.table-input-grid > input {
+    background-color: #FFFFFF;
+    border: none;
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+/* Styling untuk baris aktif dan highlight */
+.row-input.active-row {
+    background-color: #e3f2fd !important;
+    border: 1px solid #bbdefb !important;
+}
+
+.row-input.highlight-row {
+    animation: highlight 1.5s ease;
+}
+
+@keyframes highlight {
+    0% { background-color: #ffecb3; }
+    100% { background-color: white; }
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+}
+
+#transfer-data-btn, #create-pdf-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-grow: 1;
+}
+
+#transfer-data-btn {
+    background-color: var(--sap-accent-blue, #00539B);
+}
+
+#create-pdf-btn {
+    background-color: #5a6268;
+}
+
+.dual-sap-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.layout-column {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: visible !important;
+}
+
+.layout-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #343a40;
+    margin-bottom: 10px;
+}
+
+/* Simplifikasi elemen UI untuk PDF */
+.main-menu, .title-bar, .actions-toolbar, .tabs {
+    background-color: var(--sap-bg-header);
+    border-bottom: 1px solid var(--sap-border-color);
+}
+
+.main-menu ul {
+    list-style: none; 
+    display: flex; 
+    gap: 16px;
+    padding: 4px 8px; 
+    height: 28px; 
+    align-items: center;
+}
+
+.main-menu li { 
+    font-size: 13px; 
+}
+
+.title-bar h1 { 
+    font-size: 20px; 
+    font-weight: bold; 
+    padding: 6px 12px; 
+}
+
+.actions-toolbar {
+    padding: 4px 8px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+}
+
+.actions-toolbar button {
+    display: inline-flex; 
+    align-items: center; 
+    gap: 5px; 
+    background: none;
+    border: none; 
+    cursor: pointer; 
+    font-family: inherit; 
+    font-size: 15px;
+    padding: 4px 8px; 
+    border-radius: 3px;
+}
+
+.actions-toolbar .icon-add { 
+    color: #E67E22; 
+}
+
+.actions-toolbar .icon-org { 
+    color: #27AE60; 
+}
+
+.actions-toolbar .icon-check { 
+    color: #F1C40F; 
+}
+
+.actions-toolbar .icon-lock { 
+    color: #555555; 
+}
+
+.tabs { 
+    display: flex; 
+    padding-left: 8px; 
+    height: 36px; 
+}
+
+.tab-link {
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    padding: 8px 8px;
+    border: 1px solid transparent; 
+    border-bottom: none; 
+    background-color: transparent;
+    cursor: pointer; 
+    font-family: inherit; 
+    font-size: 12px; 
+    color: #333;
+    position: relative; 
+    top: 1px;
+}
+
+.tab-link .fa-layer-group { 
+    color: #E67E22; 
+}
+
+.tab-link.active {
+    background-color: var(--sap-bg-input); 
+    border-color: var(--sap-border-color);
+    border-bottom-color: var(--sap-bg-input); 
+    font-weight: 600;
+}
+
+.tab-content { 
+    padding: 16px; 
+    display: none; 
+    background-color: var(--sap-bg-input); 
+    opacity: 1 !important;
+    position: absolute;
+    width: 100%;
+    top: -9999px;
+    left: -9999px;
+}
+
+.tab-content.active { 
+    display: block; 
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+}
+
+.form-section { 
+    margin-top: 24px; 
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.section-content { 
+    border: 1px solid var(--sap-border-color); 
+    padding: 5px; 
+}
+
+.section-header {
+    color: var(--sap-accent-blue); 
+    font-size: 14px; 
+    font-weight: 600;
+    padding-bottom: 1px; 
+    margin-bottom: 1px;
+    border-bottom: 1px solid var(--sap-accent-blue);
+}
+
+input[type="text"] {
+    font-family: inherit; 
+    font-size: 13px; 
+    background-color: var(--sap-bg-input);
+    border: 1px solid var(--sap-border-color-input); 
+    padding: 4px 6px;
+    height: var(--element-height);
+}
+
+input[type="text"]:focus { 
+    outline: 1px solid var(--sap-accent-blue); 
+}
+
+input[type="text"][readonly] { 
+    background-color: #F0F0F0; 
+    overflow: visible !important;
+    white-space: nowrap !important;
+}
+
+.top-form-grid {
+    display: grid; 
+    grid-template-columns: 100px 1fr auto;
+    gap: 3px; 
+    align-items: center; 
+    margin-bottom: 16px;
+}
+
+.top-form-grid > label {
+    font-size: 13px; 
+    height: var(--element-height); 
+    display: flex;
+    align-items: center; 
+    border-bottom: 1px solid var(--sap-border-color-input);
+}
+
+.top-form-grid input[type="text"] { 
+    width: 100%; 
+}
+
+.input-icon {
+    border: 1px solid var(--sap-border-color); 
+    background-color: var(--sap-bg-header);
+    padding: 0 8px; 
+    font-size: 11px; 
+    cursor: pointer; 
+    height: var(--element-height);
+}
+
+.two-column-layout {
+    display: grid; 
+    grid-template-columns: 2fr 1fr;
+    gap: 20px; 
+    padding-top: 6px;
+}
+
+.left-column, .right-column { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 3px; 
+}
+
+.uom-description { 
+    font-size: 13px; 
+    padding: 0 4px; 
+    align-self: center; 
+}
+
+.form-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 3px; 
+}
+
+.form-row > label[for] {
+    width: auto; 
+    font-size: 13px; 
+    height: var(--element-height); 
+    display: flex;
+    align-items: center; 
+    padding-right: 10px;
+    border-bottom: 1px solid var(--sap-border-color-input);
+}
+
+.left-column .form-row > label[for] { 
+    width: 150px; 
+}
+
+.right-column .form-row > label[for] { 
+    width: 120px; 
+}
+
+.form-row > input[type="text"] { 
+    flex-grow: 0; 
+}
+
+.sub-section-container {
+    border: 1px solid var(--sap-border-color); 
+    padding: 3px; 
+    margin-top: 3px;
+    display: flex; 
+    flex-direction: column; 
+    gap: 3px;
+}
+
+.sub-section-header {
+    color: var(--sap-accent-blue); 
+    font-size: 13px; 
+    font-weight: normal;
+    padding-bottom: 8px; 
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--sap-accent-blue);
+}
+
+.sub-section-container .form-row > label[for] { 
+    padding-left: 0; 
+    width: 150px; 
+}
+
+.input-xs { 
+    width: 45px; 
+}
+
+.input-m { 
+    width: 90px; 
+}
+
+.input-d { 
+    width: 40px; 
+}
+
+
+.input-l { 
+    width: 150px; 
+}
+
+.input-x { 
+    width: 80px; 
+}
+
+.input-xl { 
+    width: 350px; 
+}
+
+/* =============== OPTIMASI KHUSUS UNTUK PDF =============== */
+/* Mengurangi kompleksitas visual untuk hasil PDF yang lebih ringan */
+#pdf-content {
+    overflow: visible !important;
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+}
+
+.layout-column .sap-container {
+    overflow: visible !important;
+    position: relative;
+}
+
+.tab-content {
+    display: block !important;
+    opacity: 1 !important;
+    position: absolute;
+    width: 100%;
+    top: -9999px;
+    left: -9999px;
+    z-index: 1;
+}
+
+.tab-content.active {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: 2;
+}
+
+/* Menghilangkan efek visual yang tidak perlu untuk PDF */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    body, html {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    .main-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .sap-container {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        background: white !important;
+    }
+    
+    .button-container, 
+    .table-input-panel {
+        display: none !important;
+    }
+    
+    /* Mengurangi ketebalan border untuk kompresi */
+    .section-content, 
+    .sub-section-container,
+    input[type="text"] {
+        border-width: 0.5px !important;
+    }
+    
+    /* Menghilangkan efek transisi dan animasi */
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    /* Mengoptimalkan teks */
+    * {
+        text-shadow: none !important;
+        -webkit-text-stroke: 0 !important;
+    }
+    
+    /* Mengurangi padding untuk ruang lebih efisien */
+    .tab-content {
+        padding: 10px !important;
+    }
+    
+    .section-content {
+        padding: 8px !important;
+    }
+    
+    .top-form-grid {
+        gap: 8px !important;
+    }
+}
+
+/* Kompresi gambar otomatis */
+.pdf-image-compression {
+    image-rendering: optimizeQuality;
+    image-resolution: 300dpi;
+}
+
+/* Posisi absolut untuk tab non-aktif */
+.tab-content:not(.active) {
+    display: block !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    width: 100% !important;
+    height: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Perbaikan overflow umum */
+body, html, .main-wrapper, .dual-sap-layout {
+    overflow: visible !important;
+}
+
+/* Mengurangi kompleksitas grid untuk PDF */
+@media print {
+    .table-input-grid {
+        min-width: auto !important;
+        grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    }
+    
+    .two-column-layout {
+        grid-template-columns: 1.8fr 1fr !important;
+        gap: 15px !important;
+    }
+}
+
+/* Menghilangkan ikon Font Awesome untuk PDF */
+@media print {
+    .fa-layer-group, 
+    .icon-add, 
+    .icon-org, 
+    .icon-check, 
+    .icon-lock {
+        display: none !important;
+    }
+    
+    .tab-link span {
+        margin-left: 0 !important;
+    }
+}
+
+/* Kompresi tambahan untuk elemen form */
+input[type="text"], 
+.input-icon, 
+.tab-link {
+    background-image: none !important;
+    background-repeat: no-repeat !important;
+    background-position: 0 0 !important;
+}
+
+/* PERBAIKAN KHUSUS UNTUK PDF GENERATION */
+@media print {
+    /* 1. Perbaikan judul Before/After */
+    .layout-title {
+        background-color: white !important;
+        color: #333 !important;
+        border: 1px solid #ddd !important;
+        padding: 8px !important;
+        margin-bottom: 10px !important;
+        display: block !important;
+        position: relative !important;
+        z-index: 100 !important;
     }
 
-    // --- FUNGSI TAB SIMULTAN ---
-    const allTabs = document.querySelectorAll('.tab-link');
-    const allTabContents = document.querySelectorAll('.tab-content');
-    allTabs.forEach(clickedTab => {
-        clickedTab.addEventListener('click', () => {
-            let baseTargetId = clickedTab.dataset.tab;
-            if (baseTargetId.endsWith('_2')) {
-                baseTargetId = baseTargetId.slice(0, -2);
-            }
-            allTabs.forEach(tab => tab.classList.remove('active'));
-            allTabContents.forEach(content => content.classList.remove('active'));
-            const targetTab1 = document.querySelector(`.tab-link[data-tab="${baseTargetId}"]`);
-            const targetTab2 = document.querySelector(`.tab-link[data-tab="${baseTargetId}_2"]`);
-            if (targetTab1) targetTab1.classList.add('active');
-            if (targetTab2) targetTab2.classList.add('active');
-            const targetContent1 = document.getElementById(baseTargetId);
-            const targetContent2 = document.getElementById(`${baseTargetId}_2`);
-            if (targetContent1) targetContent1.classList.add('active');
-            if (targetContent2) targetContent2.classList.add('active');
-        });
-    });
-
-    // --- FUNGSI INPUT TABEL ---
-    const gridContainer = document.querySelector('.table-input-grid');
-    const transferBtn = document.getElementById('transfer-data-btn');
-
-    // Fungsi untuk menghapus tanda kutip di layout kanan
-    function removeQuotesFromRightLayout() {
-        const rightLayoutInputs = document.querySelectorAll('.layout-column:last-child input[type="text"]');
-
-        rightLayoutInputs.forEach(input => {
-            input.value = input.value.replace(/"/g, '');
-
-            input.addEventListener('input', function() {
-                this.value = this.value.replace(/"/g, '');
-            });
-        });
+    /* 2. Perbaikan form input */
+    .top-form-grid {
+        display: grid !important;
+        grid-template-columns: 100px 1fr auto !important;
+        gap: 10px !important;
     }
 
-    // Fungsi untuk menerapkan data dari baris tertentu
-    function applyTableData(row = 1) {
-        const materialVal = document.getElementById(`table-material-${row}`).value;
-        const descriptionVal = document.getElementById(`table-description-${row}`).value;
-        const partNumberVal = document.getElementById(`table-partnumber-${row}`).value;
-        const uomVal = document.getElementById(`table-uom-${row}`).value;
-        const matTypeVal = document.getElementById(`table-mattype-${row}`).value;
-        const matGroupVal = document.getElementById(`table-matgroup-${row}`).value;
-
-        // Layout kiri (Before) - data asli
-        document.getElementById('material').value = materialVal;
-        document.getElementById('description').value = descriptionVal;
-        document.getElementById('base-unit').value = uomVal;
-        document.getElementById('material-group').value = matGroupVal;
-        document.getElementById('mfr-part-number').value = partNumberVal;
-
-        // Layout kanan (After) - hapus tanda kutip
-        document.getElementById('material_2').value = materialVal.replace(/"/g, '');
-        document.getElementById('description_2').value = descriptionVal.replace(/"/g, '');
-        document.getElementById('base-unit_2').value = uomVal.replace(/"/g, '');
-        document.getElementById('material-group_2').value = matGroupVal.replace(/"/g, '');
-        document.getElementById('mfr-part-number_2').value = partNumberVal.replace(/"/g, '');
-        // =========================
-
-        // Highlight baris yang aktif
-        highlightActiveRow(row);
-
-        // Update baris aktif
-        currentActiveRow = row;
-
-        // Terapkan penghapus tanda kutip
-        removeQuotesFromRightLayout();
-
-        if (transferBtn) {
-            transferBtn.textContent = `Data Row ${row} Applied!`;
-            setTimeout(() => {
-                transferBtn.textContent = 'Apply Data to Layout';
-            }, 1500);
-        }
+    /* 3. Perbaikan posisi Material dan Description */
+    #material, #description, 
+    #material_2, #description_2 {
+        position: static !important;
+        margin: 0 !important;
+        padding: 4px 6px !important;
+        width: 100% !important;
     }
 
-    // Fungsi untuk highlight baris aktif
-    function highlightActiveRow(row) {
-        // Reset semua baris
-        document.querySelectorAll('.row-input').forEach(input => {
-            input.classList.remove('active-row');
-        });
 
-        // Highlight baris aktif
-        document.querySelectorAll(`.row-input[data-row="${row}"]`).forEach(input => {
-            input.classList.add('active-row');
-        });
+    /* 5. Perbaikan tampilan tabel */
+    .two-column-layout {
+        display: grid !important;
+        grid-template-columns: 2fr 1fr !important;
+        gap: 20px !important;
     }
 
-    // Event listener untuk tombol transfer data
-    if (transferBtn) {
-        transferBtn.addEventListener('click', () => applyTableData(currentActiveRow));
+    /* 6. Perbaikan Parts Interchangeability */
+    .sub-section-container {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
-    // Event listener untuk input field (deteksi baris aktif)
-    document.querySelectorAll('.row-input').forEach(input => {
-        input.addEventListener('focus', function() {
-            const row = this.dataset.row;
-            currentActiveRow = parseInt(row);
-            highlightActiveRow(currentActiveRow);
-        });
-    });
-
-    // Fungsi paste dari Excel
-    if (gridContainer) {
-        gridContainer.addEventListener('paste', function(event) {
-            event.preventDefault();
-            const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-            const rows = pastedText.split('\n').map(row => row.split('\t'));
-
-            for (let i = 0; i < Math.min(rows.length, 5); i++) {
-                const rowData = rows[i];
-                if (rowData.length >= 6) {
-                    document.getElementById(`table-material-${i+1}`).value = rowData[0] || '';
-                    document.getElementById(`table-description-${i+1}`).value = rowData[1] || '';
-                    document.getElementById(`table-partnumber-${i+1}`).value = rowData[2] || '';
-                    document.getElementById(`table-uom-${i+1}`).value = rowData[3] || '';
-                    document.getElementById(`table-mattype-${i+1}`).value = rowData[4] || '';
-                    document.getElementById(`table-matgroup-${i+1}`).value = rowData[5] || '';
-
-                    // Highlight baris
-                    document.querySelectorAll(`.row-input[data-row="${i+1}"]`).forEach(input => {
-                        input.classList.add('highlight-row');
-                        setTimeout(() => input.classList.remove('highlight-row'), 1500);
-                    });
-                }
-            }
-
-            // Set baris pertama sebagai aktif setelah paste
-            currentActiveRow = 1;
-            highlightActiveRow(currentActiveRow);
-        });
+    /* 7. Perbaikan umum untuk PDF */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background-image: none !important;
+        text-shadow: none !important;
     }
+}
 
-    // --- FUNGSI MEMBUAT PDF ---
-    const pdfBtn = document.getElementById('create-pdf-btn');
-    const allPdfsBtn = document.getElementById('create-all-pdfs-btn');
-
-    // Fungsi untuk membuat PDF dari baris tertentu
-    async function createPdfForRow(row) {
-        const {
-            jsPDF
-        } = window.jspdf;
-
-        // Terapkan data dari baris ini
-        applyTableData(row);
-
-        // Beri waktu untuk render UI
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        // Buat PDF
-        const content = document.getElementById('pdf-content');
-        const canvas = await html2canvas(content, {
-            scale: 1,
-            useCORS: true,
-            backgroundColor: '#FFFFFF',
-            logging: false
-        });
-
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'legal',
-            compress: true
-        });
-
-        const imgData = canvas.toDataURL('image/jpeg', 0.85);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const ratio = canvas.height / canvas.width;
-        const imgWidth = pdfWidth - 20;
-        const imgHeight = imgWidth * ratio;
-
-        pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
-
-        const filename = generateValidationFilename();
-        pdf.save(filename);
-
-        return true;
+/* PERBAIKAN TAMBAHAN UNTUK RENDER PDF */
+.pdf-optimize {
+    /* Pastikan semua elemen terlihat saat render */
+    .tab-content {
+        display: block !important;
+        opacity: 1 !important;
+        position: absolute;
+        width: 100%;
+        top: -9999px;
+        left: -9999px;
     }
-
-    // Handler untuk tombol Create Current PDF
-    if (pdfBtn) {
-        pdfBtn.addEventListener('click', async function() {
-            this.textContent = 'Creating PDF...';
-            this.disabled = true;
-
-            try {
-                await createPdfForRow(currentActiveRow);
-                this.textContent = 'PDF Created!';
-                setTimeout(() => {
-                    this.textContent = 'Create Current PDF';
-                    this.disabled = false;
-                }, 1500);
-            } catch (err) {
-                console.error("PDF creation failed:", err);
-                this.textContent = 'Error Creating PDF';
-                this.disabled = false;
-            }
-        });
+    
+    .tab-content.active {
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
     }
-
-    // Handler untuk tombol Create All PDFs
-    if (allPdfsBtn) {
-        allPdfsBtn.addEventListener('click', async function() {
-            this.textContent = 'Creating PDFs...';
-            this.disabled = true;
-
-            try {
-                for (let i = 1; i <= 5; i++) {
-                    // Lewati baris kosong
-                    const materialVal = document.getElementById(`table-material-${i}`).value;
-                    if (!materialVal.trim()) continue;
-
-                    await createPdfForRow(i);
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-
-                this.textContent = 'All PDFs Created!';
-                setTimeout(() => {
-                    this.textContent = 'Create All 5 PDFs';
-                    this.disabled = false;
-                }, 2000);
-            } catch (err) {
-                console.error("PDF creation failed:", err);
-                this.textContent = 'Error Creating PDFs';
-                this.disabled = false;
-            }
-        });
+    
+    /* Perbaikan input field */
+    input[type="text"] {
+        background-color: white !important;
+        border: 1px solid #ccc !important;
+        overflow: visible !important;
+        white-space: nowrap !important;
     }
+    
+    /* Perbaikan layout title */
+    .layout-title {
+        background-color: white;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        z-index: 100;
+    }
+}
 
-    // --- INISIALISASI AWAL ---
-    // Set data row untuk semua input
-    document.querySelectorAll('.row-input').forEach((input, index) => {
-        const row = Math.floor(index / 6) + 1;
-        input.dataset.row = row;
-    });
+/* Tambahkan di style.css */
+.layout-column:last-child input[type="text"] {
+}
 
-    // Highlight baris pertama sebagai default
-    highlightActiveRow(1);
-
-    console.log("SAP Layout Generator siap dengan fitur 5 baris input!");
-});
+.layout-column:last-child input[type="text"]:focus {
+    outline: 2px solid #ffcccc; /* Highlight merah saat focus */
+}
