@@ -1,28 +1,26 @@
 document.addEventListener('DOMContentLoaded', function() {
     // --- VARIABEL GLOBAL ---
     let currentActiveRow = 1;
-
+    
     // --- MANAJEMEN NAMA FILE PDF ---
-    /**
-     * Objek untuk mengelola state (status) penghitung file.
-     * Ini akan melacak tanggal terakhir dan nomor urut terakhir yang digunakan.
-     */
     const fileCounterState = {
         lastDate: '',
         counter: 0
     };
 
-    /**
-     * Fungsi untuk menghasilkan nama file sesuai format DDMMYY-Nomor_VALIDATION.pdf
-     * @returns {string} Nama file yang sudah diformat.
-     */
-    function generateValidationFilename() {
+    // --- Fungsi untuk generate nama file ---
+    function generateFilename() {
         const now = new Date();
         const day = String(now.getDate()).padStart(2, '0');
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const year = now.getFullYear().toString().slice(-2);
         const currentDateString = `${day}${month}${year}`;
 
+        // PERBAIKAN: Menggunakan ID 'kpi-type' yang sesuai dengan HTML
+        const docTypeSelect = document.getElementById('kpi-type');
+        const documentType = docTypeSelect ? docTypeSelect.value : "VALIDATION";
+
+        // Perbarui counter berdasarkan tanggal
         if (currentDateString === fileCounterState.lastDate) {
             fileCounterState.counter++;
         } else {
@@ -30,7 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
             fileCounterState.counter = 1;
         }
 
-        const filename = `${fileCounterState.lastDate}-${fileCounterState.counter}_VALIDATION.pdf`;
+        // Format nama file
+        const formattedDocType = documentType.replace(/ /g, '_');
+        const filename = `${fileCounterState.lastDate}-${fileCounterState.counter}_${formattedDocType}.pdf`;
+        
+        console.log("Generated filename:", filename);
+        console.log("Document type used:", documentType);
         return filename;
     }
 
@@ -63,54 +66,53 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fungsi untuk menghapus tanda kutip di layout kanan
     function removeQuotesFromRightLayout() {
         const rightLayoutInputs = document.querySelectorAll('.layout-column:last-child input[type="text"]');
-
         rightLayoutInputs.forEach(input => {
             input.value = input.value.replace(/"/g, '');
-
-            input.addEventListener('input', function() {
-                this.value = this.value.replace(/"/g, '');
-            });
         });
     }
 
     // Fungsi untuk menerapkan data dari baris tertentu
     function applyTableData(row = 1) {
-        const materialVal = document.getElementById(`table-material-${row}`).value;
-        const descriptionVal = document.getElementById(`table-description-${row}`).value;
-        const partNumberVal = document.getElementById(`table-partnumber-${row}`).value;
-        const uomVal = document.getElementById(`table-uom-${row}`).value;
-        const matTypeVal = document.getElementById(`table-mattype-${row}`).value;
-        const matGroupVal = document.getElementById(`table-matgroup-${row}`).value;
+        try {
+            const materialVal = document.getElementById(`table-material-${row}`).value;
+            const descriptionVal = document.getElementById(`table-description-${row}`).value;
+            const partNumberVal = document.getElementById(`table-partnumber-${row}`).value;
+            const uomVal = document.getElementById(`table-uom-${row}`).value;
+            const matTypeVal = document.getElementById(`table-mattype-${row}`).value;
+            const matGroupVal = document.getElementById(`table-matgroup-${row}`).value;
 
-        // Layout kiri (Before) - data asli
-        document.getElementById('material').value = materialVal;
-        document.getElementById('description').value = descriptionVal;
-        document.getElementById('base-unit').value = uomVal;
-        document.getElementById('material-group').value = matGroupVal;
-        document.getElementById('mfr-part-number').value = partNumberVal;
+            // Layout kiri (Before)
+            document.getElementById('material').value = materialVal;
+            document.getElementById('description').value = descriptionVal;
+            document.getElementById('base-unit').value = uomVal;
+            document.getElementById('material-group').value = matGroupVal;
+            document.getElementById('mfr-part-number').value = partNumberVal;
 
-        // Layout kanan (After) - hapus tanda kutip dan spasi ganda
-        document.getElementById('material_2').value = materialVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-        document.getElementById('description_2').value = descriptionVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-        document.getElementById('base-unit_2').value = uomVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-        document.getElementById('material-group_2').value = matGroupVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-        document.getElementById('mfr-part-number_2').value = partNumberVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-        // =========================
+            // Layout kanan (After) - hapus tanda kutip dan spasi ganda
+            document.getElementById('material_2').value = materialVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+            document.getElementById('description_2').value = descriptionVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+            document.getElementById('base-unit_2').value = uomVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+            document.getElementById('material-group_2').value = matGroupVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+            document.getElementById('mfr-part-number_2').value = partNumberVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
 
-        // Highlight baris yang aktif
-        highlightActiveRow(row);
+            // Highlight baris yang aktif
+            highlightActiveRow(row);
 
-        // Update baris aktif
-        currentActiveRow = row;
+            // Update baris aktif
+            currentActiveRow = row;
 
-        // Terapkan penghapus tanda kutip
-        removeQuotesFromRightLayout();
+            // Terapkan penghapus tanda kutip
+            removeQuotesFromRightLayout();
 
-        if (transferBtn) {
-            transferBtn.textContent = `Data Row ${row} Applied!`;
-            setTimeout(() => {
-                transferBtn.textContent = 'Apply Data to Layout';
-            }, 1500);
+            if (transferBtn) {
+                transferBtn.textContent = `Data Row ${row} Applied!`;
+                setTimeout(() => {
+                    transferBtn.textContent = 'Apply Data to Layout';
+                }, 1500);
+            }
+        } catch (error) {
+            console.error("Error in applyTableData:", error);
+            alert("Terjadi kesalahan saat menerapkan data. Pastikan semua field ada.");
         }
     }
 
@@ -129,7 +131,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listener untuk tombol transfer data
     if (transferBtn) {
-        transferBtn.addEventListener('click', () => applyTableData(currentActiveRow));
+        transferBtn.addEventListener('click', () => {
+            applyTableData(currentActiveRow);
+        });
     }
 
     // Event listener untuk input field (deteksi baris aktif)
@@ -178,9 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fungsi untuk membuat PDF dari baris tertentu
     async function createPdfForRow(row) {
-        const {
-            jsPDF
-        } = window.jspdf;
+        const { jsPDF } = window.jspdf;
 
         // Terapkan data dari baris ini
         applyTableData(row);
@@ -213,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
 
-        const filename = generateValidationFilename();
+        const filename = generateFilename();
         pdf.save(filename);
 
         return true;
@@ -222,20 +224,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handler untuk tombol Create Current PDF
     if (pdfBtn) {
         pdfBtn.addEventListener('click', async function() {
+            const originalText = this.textContent;
             this.textContent = 'Creating PDF...';
             this.disabled = true;
+
+            // Debug: tampilkan nilai dropdown saat ini
+            const docTypeSelect = document.getElementById('kpi-type');
+            console.log("Current dropdown value:", docTypeSelect ? docTypeSelect.value : "N/A");
 
             try {
                 await createPdfForRow(currentActiveRow);
                 this.textContent = 'PDF Created!';
                 setTimeout(() => {
-                    this.textContent = 'Create Current PDF';
+                    this.textContent = originalText;
                     this.disabled = false;
                 }, 1500);
             } catch (err) {
                 console.error("PDF creation failed:", err);
                 this.textContent = 'Error Creating PDF';
-                this.disabled = false;
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.disabled = false;
+                }, 1500);
             }
         });
     }
@@ -243,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handler untuk tombol Create All PDFs
     if (allPdfsBtn) {
         allPdfsBtn.addEventListener('click', async function() {
+            const originalText = this.textContent;
             this.textContent = 'Creating PDFs...';
             this.disabled = true;
 
@@ -258,13 +269,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 this.textContent = 'All PDFs Created!';
                 setTimeout(() => {
-                    this.textContent = 'Create All 5 PDFs';
+                    this.textContent = originalText;
                     this.disabled = false;
                 }, 2000);
             } catch (err) {
                 console.error("PDF creation failed:", err);
                 this.textContent = 'Error Creating PDFs';
-                this.disabled = false;
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.disabled = false;
+                }, 2000);
             }
         });
     }
