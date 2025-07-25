@@ -102,8 +102,20 @@
                 </div>
             </div>
             <div class="button-container">
-                <button id="transfer-data-btn">Apply Data to Layout</button>
-                <button id="create-pdf-btn">Create Current PDF</button>
+                <!-- Dropdown KPI Type -->
+                <div class="kpi-type-selector">
+                    <label for="kpi-type">KPI Type:</label>
+                    <select id="kpi-type">
+                    <option value="VALIDATION">VALIDATION</option>
+                    <option value="INFORMATION COMPLETE">INFORMATION COMPLETE</option>
+                    </select>
+                </div>
+
+                <!-- Tombol Apply Data to Layout -->
+                <button id="transfer-data-btn" class="btn btn-primary">Apply Data to Layout</button>
+                
+                <!-- Tombol Create Current PDF -->
+                <button id="create-pdf-btn" class="btn btn-success">Create Current PDF</button>
                 <button id="create-all-pdfs-btn">Create All 5 PDFs</button>
             </div>
         </div>
