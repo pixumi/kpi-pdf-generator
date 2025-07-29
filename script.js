@@ -37,6 +37,24 @@ document.addEventListener('DOMContentLoaded', function() {
         return filename;
     }
 
+    // --- FUNGSI PEMROSESAN INPUT BARU ---
+    function processInputValue(value) {
+        if (value === null || value === undefined) return '';
+        
+        // Ganti tanda kutip ganda berulang dengan " INCH"
+        let processed = value.toString()
+            .replace(/"""{1,2}/g, ' INCH')  // Tangani """ dan ""
+            .replace(/""/g, ' INCH');       // Tangani ""
+        
+        // Ubah ke uppercase
+        processed = processed.toUpperCase();
+        
+        // Ganti multiple spaces dengan single space
+        processed = processed.replace(/\s{2,}/g, ' ');
+        
+        return processed;
+    }
+
     // --- FUNGSI TAB SIMULTAN ---
     const allTabs = document.querySelectorAll('.tab-link');
     const allTabContents = document.querySelectorAll('.tab-content');
@@ -74,26 +92,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fungsi untuk menerapkan data dari baris tertentu
     function applyTableData(row = 1) {
         try {
-            const materialVal = document.getElementById(`table-material-${row}`).value;
-            const descriptionVal = document.getElementById(`table-description-${row}`).value;
-            const partNumberVal = document.getElementById(`table-partnumber-${row}`).value;
-            const uomVal = document.getElementById(`table-uom-${row}`).value;
-            const matTypeVal = document.getElementById(`table-mattype-${row}`).value;
-            const matGroupVal = document.getElementById(`table-matgroup-${row}`).value;
+            // Gunakan fungsi pemrosesan baru untuk semua nilai input
+            const materialVal = processInputValue(document.getElementById(`table-material-${row}`).value);
+            const descriptionVal = processInputValue(document.getElementById(`table-description-${row}`).value);
+            const partNumberVal = processInputValue(document.getElementById(`table-partnumber-${row}`).value);
+            const uomVal = processInputValue(document.getElementById(`table-uom-${row}`).value);
+            const matTypeVal = processInputValue(document.getElementById(`table-mattype-${row}`).value);
+            const matGroupVal = processInputValue(document.getElementById(`table-matgroup-${row}`).value);
 
-            // Layout kiri (Before)
+            // Layout kiri (Before) - gunakan nilai yang sudah diproses
             document.getElementById('material').value = materialVal;
             document.getElementById('description').value = descriptionVal;
             document.getElementById('base-unit').value = uomVal;
             document.getElementById('material-group').value = matGroupVal;
             document.getElementById('mfr-part-number').value = partNumberVal;
 
-            // Layout kanan (After) - hapus tanda kutip dan spasi ganda
-            document.getElementById('material_2').value = materialVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-            document.getElementById('description_2').value = descriptionVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-            document.getElementById('base-unit_2').value = uomVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-            document.getElementById('material-group_2').value = matGroupVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
-            document.getElementById('mfr-part-number_2').value = partNumberVal.replace(/"/g, '').replace(/\s+/g, ' ').trim();
+            // Layout kanan (After) - gunakan nilai yang sudah diproses
+            document.getElementById('material_2').value = materialVal;
+            document.getElementById('description_2').value = descriptionVal;
+            document.getElementById('base-unit_2').value = uomVal;
+            document.getElementById('material-group_2').value = matGroupVal;
+            document.getElementById('mfr-part-number_2').value = partNumberVal;
 
             // Highlight baris yang aktif
             highlightActiveRow(row);
@@ -155,12 +174,13 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let i = 0; i < Math.min(rows.length, 5); i++) {
                 const rowData = rows[i];
                 if (rowData.length >= 6) {
-                    document.getElementById(`table-material-${i+1}`).value = rowData[0] || '';
-                    document.getElementById(`table-description-${i+1}`).value = rowData[1] || '';
-                    document.getElementById(`table-partnumber-${i+1}`).value = rowData[2] || '';
-                    document.getElementById(`table-uom-${i+1}`).value = rowData[3] || '';
-                    document.getElementById(`table-mattype-${i+1}`).value = rowData[4] || '';
-                    document.getElementById(`table-matgroup-${i+1}`).value = rowData[5] || '';
+                    // Gunakan fungsi pemrosesan baru untuk semua nilai paste
+                    document.getElementById(`table-material-${i+1}`).value = processInputValue(rowData[0] || '');
+                    document.getElementById(`table-description-${i+1}`).value = processInputValue(rowData[1] || '');
+                    document.getElementById(`table-partnumber-${i+1}`).value = processInputValue(rowData[2] || '');
+                    document.getElementById(`table-uom-${i+1}`).value = processInputValue(rowData[3] || '');
+                    document.getElementById(`table-mattype-${i+1}`).value = processInputValue(rowData[4] || '');
+                    document.getElementById(`table-matgroup-${i+1}`).value = processInputValue(rowData[5] || '');
 
                     // Highlight baris
                     document.querySelectorAll(`.row-input[data-row="${i+1}"]`).forEach(input => {
