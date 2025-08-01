@@ -16,11 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const year = now.getFullYear().toString().slice(-2);
         const currentDateString = `${day}${month}${year}`;
 
-        // PERBAIKAN: Menggunakan ID 'kpi-type' yang sesuai dengan HTML
         const docTypeSelect = document.getElementById('kpi-type');
         const documentType = docTypeSelect ? docTypeSelect.value : "VALIDATION";
 
-        // Perbarui counter berdasarkan tanggal
         if (currentDateString === fileCounterState.lastDate) {
             fileCounterState.counter++;
         } else {
@@ -28,28 +26,27 @@ document.addEventListener('DOMContentLoaded', function() {
             fileCounterState.counter = 1;
         }
 
-        // Format nama file
         const formattedDocType = documentType.replace(/ /g, '_');
         const filename = `${fileCounterState.lastDate}-${fileCounterState.counter}_${formattedDocType}.pdf`;
         
-        console.log("Generated filename:", filename);
-        console.log("Document type used:", documentType);
         return filename;
     }
 
     // --- FUNGSI PEMROSESAN INPUT BARU ---
-    function processInputValue(value) {
+    function processInputValue(value, forRightLayout = false) {
         if (value === null || value === undefined) return '';
         
-        // Ganti tanda kutip ganda berulang dengan " INCH"
-        let processed = value.toString()
-            .replace(/"""{1,2}/g, ' INCH')  // Tangani """ dan ""
-            .replace(/""/g, ' INCH');       // Tangani ""
+        let processed = value.toString();
         
-        // Ubah ke uppercase
+        // Hanya ganti quotes untuk layout kanan
+        if (forRightLayout) {
+            processed = processed
+                .replace(/"""{1,2}/g, ' INCH')
+                .replace(/""/g, ' INCH')
+                .replace(/"/g, '');
+        }
+        
         processed = processed.toUpperCase();
-        
-        // Ganti multiple spaces dengan single space
         processed = processed.replace(/\s{2,}/g, ' ');
         
         return processed;
@@ -81,47 +78,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const gridContainer = document.querySelector('.table-input-grid');
     const transferBtn = document.getElementById('transfer-data-btn');
 
-    // Fungsi untuk menghapus tanda kutip di layout kanan
-    function removeQuotesFromRightLayout() {
-        const rightLayoutInputs = document.querySelectorAll('.layout-column:last-child input[type="text"]');
-        rightLayoutInputs.forEach(input => {
-            input.value = input.value.replace(/"/g, '');
-        });
-    }
-
     // Fungsi untuk menerapkan data dari baris tertentu
     function applyTableData(row = 1) {
         try {
-            // Gunakan fungsi pemrosesan baru untuk semua nilai input
-            const materialVal = processInputValue(document.getElementById(`table-material-${row}`).value);
-            const descriptionVal = processInputValue(document.getElementById(`table-description-${row}`).value);
-            const partNumberVal = processInputValue(document.getElementById(`table-partnumber-${row}`).value);
-            const uomVal = processInputValue(document.getElementById(`table-uom-${row}`).value);
-            const matTypeVal = processInputValue(document.getElementById(`table-mattype-${row}`).value);
-            const matGroupVal = processInputValue(document.getElementById(`table-matgroup-${row}`).value);
+            // Ambil nilai mentah tanpa pemrosesan quotes
+            const materialVal = document.getElementById(`table-material-${row}`).value;
+            const descriptionVal = document.getElementById(`table-description-${row}`).value;
+            const partNumberVal = document.getElementById(`table-partnumber-${row}`).value;
+            const uomVal = document.getElementById(`table-uom-${row}`).value;
+            const matTypeVal = document.getElementById(`table-mattype-${row}`).value;
+            const matGroupVal = document.getElementById(`table-matgroup-${row}`).value;
 
-            // Layout kiri (Before) - gunakan nilai yang sudah diproses
-            document.getElementById('material').value = materialVal;
-            document.getElementById('description').value = descriptionVal;
-            document.getElementById('base-unit').value = uomVal;
-            document.getElementById('material-group').value = matGroupVal;
-            document.getElementById('mfr-part-number').value = partNumberVal;
+            // Layout kiri (Before) - tanpa penggantian quotes
+            document.getElementById('material').value = processInputValue(materialVal);
+            document.getElementById('description').value = processInputValue(descriptionVal);
+            document.getElementById('base-unit').value = processInputValue(uomVal);
+            document.getElementById('material-group').value = processInputValue(matGroupVal);
+            document.getElementById('mfr-part-number').value = processInputValue(partNumberVal);
 
-            // Layout kanan (After) - gunakan nilai yang sudah diproses
-            document.getElementById('material_2').value = materialVal;
-            document.getElementById('description_2').value = descriptionVal;
-            document.getElementById('base-unit_2').value = uomVal;
-            document.getElementById('material-group_2').value = matGroupVal;
-            document.getElementById('mfr-part-number_2').value = partNumberVal;
+            // Layout kanan (After) - dengan penggantian quotes
+            document.getElementById('material_2').value = processInputValue(materialVal, true);
+            document.getElementById('description_2').value = processInputValue(descriptionVal, true);
+            document.getElementById('base-unit_2').value = processInputValue(uomVal, true);
+            document.getElementById('material-group_2').value = processInputValue(matGroupVal, true);
+            document.getElementById('mfr-part-number_2').value = processInputValue(partNumberVal, true);
 
             // Highlight baris yang aktif
             highlightActiveRow(row);
-
-            // Update baris aktif
             currentActiveRow = row;
-
-            // Terapkan penghapus tanda kutip
-            removeQuotesFromRightLayout();
 
             if (transferBtn) {
                 transferBtn.textContent = `Data Row ${row} Applied!`;
@@ -137,12 +121,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fungsi untuk highlight baris aktif
     function highlightActiveRow(row) {
-        // Reset semua baris
         document.querySelectorAll('.row-input').forEach(input => {
             input.classList.remove('active-row');
         });
 
-        // Highlight baris aktif
         document.querySelectorAll(`.row-input[data-row="${row}"]`).forEach(input => {
             input.classList.add('active-row');
         });
@@ -164,29 +146,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Fungsi paste dari Excel
+    // Fungsi paste dari Excel untuk 25 baris
     if (gridContainer) {
         gridContainer.addEventListener('paste', function(event) {
             event.preventDefault();
             const pastedText = (event.clipboardData || window.clipboardData).getData('text');
             const rows = pastedText.split('\n').map(row => row.split('\t'));
 
-            for (let i = 0; i < Math.min(rows.length, 5); i++) {
+            // Loop untuk setiap baris yang dipaste (maks 25 baris)
+            for (let i = 0; i < Math.min(rows.length, 25); i++) {
                 const rowData = rows[i];
-                if (rowData.length >= 6) {
-                    // Gunakan fungsi pemrosesan baru untuk semua nilai paste
-                    document.getElementById(`table-material-${i+1}`).value = processInputValue(rowData[0] || '');
-                    document.getElementById(`table-description-${i+1}`).value = processInputValue(rowData[1] || '');
-                    document.getElementById(`table-partnumber-${i+1}`).value = processInputValue(rowData[2] || '');
-                    document.getElementById(`table-uom-${i+1}`).value = processInputValue(rowData[3] || '');
-                    document.getElementById(`table-mattype-${i+1}`).value = processInputValue(rowData[4] || '');
-                    document.getElementById(`table-matgroup-${i+1}`).value = processInputValue(rowData[5] || '');
+                if (rowData.length >= 1) { // Minimal ada 1 kolom
+                    // Isi input dengan ID yang sesuai
+                    if (document.getElementById(`table-material-${i+1}`)) {
+                        document.getElementById(`table-material-${i+1}`).value = rowData[0] || '';
+                        document.getElementById(`table-description-${i+1}`).value = rowData[1] || '';
+                        document.getElementById(`table-partnumber-${i+1}`).value = rowData[2] || '';
+                        document.getElementById(`table-uom-${i+1}`).value = rowData[3] || '';
+                        document.getElementById(`table-mattype-${i+1}`).value = rowData[4] || '';
+                        document.getElementById(`table-matgroup-${i+1}`).value = rowData[5] || '';
 
-                    // Highlight baris
-                    document.querySelectorAll(`.row-input[data-row="${i+1}"]`).forEach(input => {
-                        input.classList.add('highlight-row');
-                        setTimeout(() => input.classList.remove('highlight-row'), 1500);
-                    });
+                        // Highlight baris
+                        const rowNum = i + 1;
+                        document.querySelectorAll(`.row-input[data-row="${rowNum}"]`).forEach(input => {
+                            input.classList.add('highlight-row');
+                            setTimeout(() => input.classList.remove('highlight-row'), 1500);
+                        });
+                    }
                 }
             }
 
@@ -204,13 +190,9 @@ document.addEventListener('DOMContentLoaded', function() {
     async function createPdfForRow(row) {
         const { jsPDF } = window.jspdf;
 
-        // Terapkan data dari baris ini
         applyTableData(row);
-
-        // Beri waktu untuk render UI
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        // Buat PDF
         const content = document.getElementById('pdf-content');
         const canvas = await html2canvas(content, {
             scale: 1,
@@ -234,10 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const imgHeight = imgWidth * ratio;
 
         pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
-
-        const filename = generateFilename();
-        pdf.save(filename);
-
+        pdf.save(generateFilename());
         return true;
     }
 
@@ -247,10 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = this.textContent;
             this.textContent = 'Creating PDF...';
             this.disabled = true;
-
-            // Debug: tampilkan nilai dropdown saat ini
-            const docTypeSelect = document.getElementById('kpi-type');
-            console.log("Current dropdown value:", docTypeSelect ? docTypeSelect.value : "N/A");
 
             try {
                 await createPdfForRow(currentActiveRow);
@@ -278,9 +253,11 @@ document.addEventListener('DOMContentLoaded', function() {
             this.disabled = true;
 
             try {
-                for (let i = 1; i <= 5; i++) {
-                    // Lewati baris kosong
-                    const materialVal = document.getElementById(`table-material-${i}`).value;
+                for (let i = 1; i <= 25; i++) {
+                    const materialInput = document.getElementById(`table-material-${i}`);
+                    if (!materialInput) continue;
+                    
+                    const materialVal = materialInput.value;
                     if (!materialVal.trim()) continue;
 
                     await createPdfForRow(i);
@@ -303,15 +280,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Inisialisasi data-row untuk semua input
+    function initializeRowDataAttributes() {
+        for (let row = 1; row <= 25; row++) {
+            const inputs = [
+                document.getElementById(`table-material-${row}`),
+                document.getElementById(`table-description-${row}`),
+                document.getElementById(`table-partnumber-${row}`),
+                document.getElementById(`table-uom-${row}`),
+                document.getElementById(`table-mattype-${row}`),
+                document.getElementById(`table-matgroup-${row}`)
+            ];
+            
+            inputs.forEach(input => {
+                if (input) input.dataset.row = row;
+            });
+        }
+    }
+
     // --- INISIALISASI AWAL ---
-    // Set data row untuk semua input
-    document.querySelectorAll('.row-input').forEach((input, index) => {
-        const row = Math.floor(index / 6) + 1;
-        input.dataset.row = row;
-    });
-
-    // Highlight baris pertama sebagai default
+    initializeRowDataAttributes();
     highlightActiveRow(1);
-
-    console.log("SAP Layout Generator siap dengan fitur 5 baris input!");
 });
