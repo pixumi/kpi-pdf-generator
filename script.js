@@ -43,7 +43,9 @@ document.addEventListener('DOMContentLoaded', function() {
             processed = processed
                 .replace(/"""{1,2}/g, ' INCH')
                 .replace(/""/g, ' INCH')
-                .replace(/"/g, '');
+                .replace(/"/g, '')
+                .replace(/;/g, ' ')
+                .replace(/; /g, '');
         }
         
         processed = processed.toUpperCase();
@@ -302,3 +304,4 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRowDataAttributes();
     highlightActiveRow(1);
 });
+
